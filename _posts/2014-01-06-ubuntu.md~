@@ -1,0 +1,316 @@
+#ubuntu references
+
+## Cannot open shared object file *libudev.so.0*
+```shell
+sudo ln -sf /lib/i386-linux-gnu/libudev.so.1 /lib/i386-linux-gnu/libudev.so.0
+```
+
+## Mount MDF/ISO file
+```shell
+sudo mount -o loop -t iso9660 filename.mdf /media
+or
+sudo mount -o loop -t iso9660 filename.iso /media
+```
+
+## FTP server
+1. install
+    ```shell
+    sudo apt-get install vsftpd
+    sudo mkdir -p /home/ftpuser
+	sudo useradd ftpuser -g ftp -d /home/ftpuser -s /sbin/nologin
+	sudo passwd ftpuser
+    ```
+2. configuration
+    ```shell
+	sudo gedit /etc/vsftpd.conf
+    ```
+    >	
+    	#禁止匿名访问
+    	anonymous_enable=NO
+    	#接受本地用户
+    	local_enable=YES
+        #可以上传
+        write_enable=YES
+        #启用在chroot_list_file的用户只能访问根目录
+        chroot_list_enable=YES
+        chroot_list_file=/etc/vsftpd.chroot_list
+        
+    ```shell
+    sudo touch /etc/vsftpd.chroot_list
+	sudo echo "ftpuser" >> /etc/vsftpd.chroot_list
+	```
+
+3. maybe error
+```shell
+error: “530 Login incorrect” 
+	sudo echo "/sbin/nologin" >> /etc/shells
+```
+
+## TFTP server
+1. install
+```shell
+sudo apt-get install xinetd
+sudo apt-get install tftp tftpd
+```
+2. configure
+
+ 建立**/etc/xinetd.d/tftp**文件，写入如下内容：
+>service tftp  
+{
+		socket_type    = dgram
+    	protocol       = udp
+        wait           = yes
+    	user           = root
+    	server         = /usr/sbin/in.tftpd
+    	server_args    = -s /var/lib/tftpboot/
+    	disable        = no
+    	per_source     = 11
+    	cps            = 100 2
+    	flags          = IPv4
+}
+
+	其中server_args设置的/var/lib/tftpboot目录是tftp服务器的目录，设置其访问权限为777：
+	```shell
+    sudo chmod 777 /var/lib/tftpboot/
+    ```
+
+3. 启动或者重启xinetd服务：
+	```shell
+    sudo /etc/init.d/xinetd start 或者 restart
+    ```
+    
+## DHCP server
+1. install
+	```shell
+    sudo apt-get install dhcp3-server
+    ```
+2. configure
+	```shell
+    sudo gedit /etc/default/dhcp3-server
+    ```
+	>INTERFACE = "eth0"
+    
+    ```shell
+    sudo gedit /etc/dhcp3/dhcpd.conf
+    ```
+	>subnet 192.168.10.0 netmask 255.255.255.0 {
+        option domain-name "beehive.com";
+        option broadcast-address 192.168.10.255;
+        option subnet-mask 255.255.255.0;
+        option domain-name-servers 192.168.10.47,  192.168.10.5; # Comma between domain
+        option routers 192.168.10.10;
+        range 192.168.10.10 192.168.10.50; # No comma, just whitespace 需要包括本机IP
+}
+
+3. start dhcp server
+	```shell
+    sudo /etc/init.d/dhcp3-server start 或者 restart
+    ```
+    
+## Make ISO image
+```
+genisoimage -o filename pathspec
+```
+
+## Xilinx usb cable driver for ubuntu 10.04
+1. install
+
+    for 32-bit:
+    ```shell
+    sudo apt-get install gitk git-gui libusb-dev build-essential libc6-dev fxload
+    ```
+    for 64-bit:
+    ```shell
+    sudo apt-get install gitk git-gui libusb-dev build-essential libc6-dev-i386 fxload
+    ```
+2. make
+
+	```
+	cd /opt/Xilinx
+	sudo git clone git://git.zerfleddert.de/usb-driver
+    
+	cd usb-driver/
+	
+    32-bit: sudo make
+
+	64-bit: sudo make lib32
+	
+	./setup_pcusb /opt/Xilinx/13.2/ISE_DS/ISE/
+    ```
+    
+# Useful and Interesting tools
+## emacs
+```shell
+sudo apt-get install haskell-mode
+```
+
+## ghc & haskell-platform
+```shell
+sudo apt-get install ghc haskell-platform
+```
+## cabal
+```shell
+cabal update
+cabal install hoogle
+```
+
+## yesod
+```shell
+cabal install yesod
+```
+
+## gtk2hs
+```shell
+cabal install gtk2hs-buildtools
+cabal install gtk
+but it may miss some libs
+sudo apt-get install ligpango1.0-dev
+sudo apt-get install libcairo2.0-dev
+sudo apt-get install libglib2.0-dev
+sudo apt-get install libgtk2.0-dev
+```
+
+## pandoc
+```shell
+cabal install pandoc
+```
+
+## haroopad
+
+## sublime
+
+## impressive
+
+# Useful and Interesting URLs
+
+[Project Euler](http://projecteuler.net/)
+
+[Rtems on open-etech](http://www.open-etech.com/RTOS/RTEMS/)
+
+# Useful linux commands
+
+- ln 
+```shell
+ln -sf real_object symbol_link
+```
+
+- ssh
+```shell
+ssh user@host
+ssh host
+ssh -p portNum user@host
+scp local_files user@host:path_to_file
+sftp user@host
+```
+
+- virtualBox add new disk
+    ```shell
+    [settings] -> [storage] -> [add new disk]
+    then boot
+    sudo mkfs -t ext4 /dev/sdb
+    sudo mount /dev/sdb /mnt
+    ```
+- ppa
+	```shell
+    sudo add-apt-repository ppa:user/ppa-name
+    
+    //remove
+    cd /eta/apt/sourse.list.d
+    sudo rm ${ppa-name}
+    ```
+    
+# famous people in computer scinece
+- Alan Turing
+- Alonzu Church
+- Robin Minler
+- Christopher Strache
+- Peter Landin
+- Tony Hoare
+- Rod Burstall
+- Alan Robinson
+- Arvind
+- Philip Wadler
+
+* http://web.cecs.pdx.edu/~sheard/
+
+# functional programming readding list
+[free online books](http://www.freetechbooks.com/functional-programming-f34.html)
+
+[readding list](http://studentguru.gr/b/biboudis/archive/2010/11/03/functional-programming-reading-list.aspx)
+
+- J. V. Eijck and C. Unger, ***Computational Semantics with Functional Programming***, 1st ed. Cambridge University Press, 2010. 
+
+- R. Bird, ***Pearls of Functional Algorithm Design***, 1st ed. Cambridge University Press, 2010. 
+
+- D. Vytiniotis and P. Jones, “***Let should not be generalized***,” in Proceedings of the 5th ACM SIGPLAN workshop on Types in language design and implementation, pp. 39–50, 2010. 
+
+-  F. Kirchner and C. Munoz, “***The proof monad***,” Journal of Logic and Algebraic Programming, 2010.
+
+- A. Filinski, “***Monads in action***,” in Proceedings of the 37th annual ACM SIGPLAN-SIGACT symposium on Principles of programming languages, pp. 483–494, 2010.
+
+- J. Gibbons and B. C. Oliveira, “***The essence of the Iterator pattern***,” Journal of Functional Programming, vol. 19, no. 3, pp. 377–402, 2009.
+
+- G. Hutton, ***Programming in Haskell***. Cambridge University Press, 2007.
+
+- C. McBride and R. Paterson, “***Applicative programming with effects***,” Journal of functional programming, vol. 18, no. 01, pp. 1–13, 2007.
+
+- R. K. Dyvbig, S. P. Jones, and A. Sabry, “***A monadic framework for delimited continuations***,” Journal of Functional Programming, vol. 17, no. 06, pp. 687–730, 2007.
+
+- P. Wadler and P. Thiemann, “***The marriage of effects and monads***,” ACM Transactions on Computational Logic (TOCL), vol. 4, no. 1, p. 32, 2003.
+
+- B. C. Pierce, ***Types and Programming Languages***, 1st ed. The MIT Press, 2002.
+
+- B. Mcadams, “***Y in practical programs***,” 2001.
+
+- G. Hutton, “***A tutorial on the universality and expressiveness of fold***,” Journal of Functional Programming, vol. 9, no. 4, pp. 355–372, 1999.
+
+- S. Finne, D. Leijen, E. Meijer, and S. P. Jones, “***Calling hell from heaven and heaven from hell***,” in Proceedings of the fourth ACM SIGPLAN international conference on Functional programming, pp. 114-125, 1999.
+
+- J. Palsberg and C. B. Jay, “***The essence of the visitor pattern***,” COMPSAC-NEW YORK-, pp. 9–15, 1998.
+
+- G. Hutton and E. Meijer, “***Monadic parsing in Haskell***,” Journal of functional programming, vol. 8, no. 04, pp. 437–444, 1998.
+
+- G. Huet, “***The zipper***,” Journal of Functional Programming, vol. 7, no. 05, pp. 549–554, 1997.
+
+- H. Abelson and G. J. Sussman, ***Structure and Interpretation of Computer Programs*** - 2nd Edition, 2nd ed. The MIT Press, 1996.
+
+- G. Hutton and E. Meijer, “***Monadic parser combinators***,” Journal of Functional Programming, vol. 8, no. 4, pp. 437–444, 1996.
+
+- P. Wadler, “***Monads for functional programming***,” Advanced Functional Programming, pp. 24–52, 1995.
+
+- E. Meijer and G. Hutton, “***Bananas in space: Extending fold and unfold to exponential types***,” in Proceedings of the seventh international conference on Functional programming languages and computer architecture, p. 333, 1995.
+
+- P. Wadler, “***Monads and composable continuations***,” Lisp and Symbolic Computation, vol. 7, no. 1, pp. 39–55, 1994.
+
+- G. L. Steele Jr, “***Building interpreters by composing monads***,” in Proceedings of the 21st ACM SIGPLAN-SIGACT symposium on Principles of programming languages, p. 492, 1994.
+
+- J. M. Hill and K. Clarke, ***An introduction to category theory, category theory monads, and their relationship to functional programming***. Citeseer, 1994.
+
+- P. Jones, L. Simon, and P. Wadler, “***Imperative functional programming***,” in Proceedings of the 20th ACM SIGPLAN-SIGACT symposium on Principles of programming languages, p. 84, 1993.
+
+- P. Wadler, “***The essence of functional programming***,” in Proceedings of the 19th ACM SIGPLAN-SIGACT symposium on Principles of programming languages, p. 14, 1992.
+
+- D. J. King and P. Wadler, “***Combining monads***,” Functional Programming, Glasgow, pp. 134–143, 1992.
+
+- A. W. Appel, ***Compiling with Continuations***. Cambridge University Press, 1991.
+
+- E. Moggi, “***Notions of computation and monads***,” Information and computation, vol. 93, no. 1, pp. 55–92, 1991.
+
+- E. Meijer, M. Fokkinga, and R. Paterson, “***Functional programming with bananas, lenses, envelopes and barbed wire***,” in Functional Programming Languages and Computer Architecture, pp. 124–144, 1991.
+
+- O. Danvy, J. Koslowski, and K. Malmkjær, “***Compiling monads***,” TechnicalReportCIS-92-3, Kansas State University, Manhattan, Kansas, 1991.
+
+- P. Wadler, “***Comprehending monads***,” in Proceedings of the 1990 ACM conference on LISP and functional programming, pp. 61–78, 1990.
+
+- E. Moggi, “***An abstract view of programming languages***,” 1989.
+
+- J. Hughes, “***Why functional programming matters***,” The computer journal, vol. 32, no. 2, p. 98, 1989.
+
+- P. Wadler and R. Bird, “***Introduction to functional programming***,” pp. 1--14, 1988.
+
+- E. Moggi, “***Computational lambda-calculus and monads***,” 1988.
+
+- G. L. Steele Jr and G. J. Sussman, “***Lambda: The ultimate imperative***,” AIM-353, 1976.
+
+- G. L. Steele Jr, “***Lambda: The ultimate declarative***,” AIM-379, 1976. 
+
